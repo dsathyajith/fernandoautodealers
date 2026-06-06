@@ -8,7 +8,8 @@
       "PowerShell(Get-ChildItem -Path \"C:\\\\Program Files\\\\nodejs\", \"C:\\\\Program Files \\(x86\\)\\\\nodejs\", \"$env:APPDATA\\\\nvm\", \"$env:LOCALAPPDATA\\\\nvm\", \"C:\\\\nvm\", \"D:\\\\nodejs\" -ErrorAction SilentlyContinue | Select-Object FullName)",
       "PowerShell(& cmd /c \"node -v & npm -v\" 2>&1)",
       "Bash(mkdir -p d:/react-app/.github/workflows)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(where gh *)"
     ],
     "additionalDirectories": [
       "d:\\react-app\\.github"
