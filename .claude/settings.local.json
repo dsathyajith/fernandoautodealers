@@ -9,7 +9,9 @@
       "PowerShell(& cmd /c \"node -v & npm -v\" 2>&1)",
       "Bash(mkdir -p d:/react-app/.github/workflows)",
       "Bash(git add *)",
-      "Bash(where gh *)"
+      "Bash(where gh *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
     ],
     "additionalDirectories": [
       "d:\\react-app\\.github"
