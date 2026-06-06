@@ -8,7 +8,12 @@
       "Bash(git commit -m ' *)",
       "Bash(Get-ChildItem -Path \"d:\\\\react-app\" -Force)",
       "Bash(Select-Object Name, PSIsContainer)",
-      "Bash(Format-Table -AutoSize)"
+      "Bash(Format-Table -AutoSize)",
+      "Bash(git -C \"d:/react-app\" status)",
+      "Bash(git -C \"d:/react-app\" diff HEAD -- client/src/index.css client/src/components/Layout.jsx)",
+      "Bash(git -C \"d:/react-app\" log --oneline -5)",
+      "Bash(git -C \"d:/react-app\" ls-files client/src/index.css)",
+      "Bash(gh run *)"
     ]
   }
 }
