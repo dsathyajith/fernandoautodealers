@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { getVehicles, deleteVehicle, sellVehicle, updateVehicle } from '../services/vehicleService';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import * as XLSX from 'xlsx';
+import { getVehicles, deleteVehicle, sellVehicle, updateVehicle, bulkCreateVehicles } from '../services/vehicleService';
 import VehicleModal from './VehicleModal';
 
 const fmt = n => n == null ? '—' : Number(n).toLocaleString('en-LK', { maximumFractionDigits: 0 });
@@ -107,6 +108,88 @@ function ArriveModal({ open, vehicle, onClose, onDone, showToast }) {
   );
 }
 
+function ImportModal({ open, onClose, onDone, showToast }) {
+  const [rows, setRows] = useState([]);
+  const [fileName, setFileName] = useState('');
+  const [importing, setImporting] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const fileRef = useRef();
+
+  const onFile = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setFileName(file.name);
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const wb = XLSX.read(ev.target.result, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json(ws, { defval: '' });
+      setRows(data);
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  const doImport = async () => {
+    if (!rows.length) return;
+    setImporting(true);
+    setProgress(0);
+    try {
+      const errors = await bulkCreateVehicles(rows, (done, total) => setProgress(Math.round((done / total) * 100)));
+      if (errors.length) showToast(`Imported with ${errors.length} error(s)`, 'err');
+      else showToast(`${rows.length} vehicles imported!`, 'ok');
+      onDone();
+      onClose();
+    } catch (e) {
+      showToast(e.message || 'Import failed', 'err');
+    } finally {
+      setImporting(false);
+      setRows([]);
+      setFileName('');
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  };
+
+  const reset = () => { setRows([]); setFileName(''); if (fileRef.current) fileRef.current.value = ''; onClose(); };
+
+  if (!open) return null;
+  return (
+    <div className="modal-overlay open" onClick={e => e.target === e.currentTarget && reset()}>
+      <div className="qs-box" style={{ maxWidth: 460 }}>
+        <h3>📥 IMPORT FROM EXCEL</h3>
+        <p style={{ fontSize: '.74rem', color: 'var(--t3)', marginBottom: 14 }}>
+          Column headers in your sheet should match vehicle fields (Brand, Model, Status, Type, Chassis, Colour, Year, Cost, etc.)
+        </p>
+        <div className="form-row">
+          <label>Excel / CSV File</label>
+          <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" onChange={onFile} style={{ color: 'var(--t1)', fontSize: '.78rem' }} />
+        </div>
+        {rows.length > 0 && (
+          <div style={{ background: 'rgba(34,197,94,.08)', border: '1px solid rgba(34,197,94,.2)', borderRadius: 7, padding: '10px 14px', fontSize: '.78rem', color: '#4ade80', margin: '8px 0' }}>
+            ✓ {rows.length} rows found in <strong>{fileName}</strong>
+            <div style={{ color: 'var(--t3)', marginTop: 4 }}>
+              Columns: {Object.keys(rows[0] || {}).join(', ')}
+            </div>
+          </div>
+        )}
+        {importing && (
+          <div style={{ margin: '10px 0' }}>
+            <div style={{ background: 'var(--b2)', borderRadius: 4, height: 6 }}>
+              <div style={{ background: '#3b82f6', height: 6, borderRadius: 4, width: `${progress}%`, transition: 'width .2s' }} />
+            </div>
+            <div style={{ fontSize: '.72rem', color: 'var(--t3)', marginTop: 4 }}>{progress}% uploaded…</div>
+          </div>
+        )}
+        <div className="modal-actions">
+          <button className="btn-cancel" onClick={reset} disabled={importing}>Cancel</button>
+          <button className="btn-primary" onClick={doImport} disabled={!rows.length || importing}>
+            {importing ? `Importing… ${progress}%` : `Import ${rows.length || ''} Rows`}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Vehicles({ showToast, defaultStatus = '' }) {
   const [vehicles, setVehicles] = useState([]);
   const [total, setTotal] = useState(0);
@@ -125,6 +208,7 @@ export default function Vehicles({ showToast, defaultStatus = '' }) {
   const [qsCost, setQsCost] = useState(0);
   const [arrOpen, setArrOpen] = useState(false);
   const [arrVehicle, setArrVehicle] = useState(null);
+  const [importOpen, setImportOpen] = useState(false);
   const LIMIT = 20;
 
   const load = useCallback(async () => {
@@ -217,6 +301,7 @@ export default function Vehicles({ showToast, defaultStatus = '' }) {
                   <option value="">All Types</option><option>LOCAL</option><option>IMPORT</option>
                 </select>
                 <button className="btn-secondary" onClick={exportCSV}><i className="fa fa-download" /> Export</button>
+                <button className="btn-secondary" onClick={() => setImportOpen(true)}><i className="fa fa-file-excel" /> Import</button>
               </>
             )}
             <button className="btn-primary" onClick={() => { setEditVehicle(null); setModalOpen(true); }}>
@@ -320,6 +405,12 @@ export default function Vehicles({ showToast, defaultStatus = '' }) {
         open={arrOpen}
         vehicle={arrVehicle}
         onClose={() => setArrOpen(false)}
+        onDone={load}
+        showToast={showToast}
+      />
+      <ImportModal
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
         onDone={load}
         showToast={showToast}
       />

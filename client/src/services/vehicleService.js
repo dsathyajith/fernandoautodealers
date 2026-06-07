@@ -141,3 +141,88 @@ export const sellVehicle = async (id, { sell_price, sell_date, contact }) => {
 export const deleteVehicle = async (id) => {
   await deleteDoc(doc(db, COL, id));
 };
+
+const COL_MAP = {
+  status: 'status', type: 'type', brand: 'brand', model: 'model',
+  year: 'year', chassis: 'chassis', 'chassis no': 'chassis',
+  colour: 'colour', color: 'colour', mileage: 'mileage', grade: 'grade',
+  'lc date': 'lc_date', 'lc-date': 'lc_date', lcdate: 'lc_date',
+  'lc number': 'lc_num', 'lc no': 'lc_num', 'lc num': 'lc_num', lc_num: 'lc_num', lcnum: 'lc_num',
+  'tt lkr': 'tt_lkr', tt: 'tt_lkr', tt_lkr: 'tt_lkr', ttlkr: 'tt_lkr',
+  'lc lkr': 'lc_lkr', lc_lkr: 'lc_lkr', lclkr: 'lc_lkr',
+  duty: 'duty', others: 'others', cusdec: 'cusdec',
+  'clear date': 'clear_date', 'clearing date': 'clear_date', clear_date: 'clear_date',
+  cost: 'cost', 'sell date': 'sell_date', 'selling date': 'sell_date', sell_date: 'sell_date',
+  'sell price': 'sell_price', 'selling price': 'sell_price', sell_price: 'sell_price',
+  income: 'income', contact: 'contact', notes: 'notes',
+};
+
+const normalizeDate = (v) => {
+  if (!v) return null;
+  if (typeof v === 'number') {
+    // Excel serial date
+    const d = new Date(Math.round((v - 25569) * 86400 * 1000));
+    return d.toISOString().split('T')[0];
+  }
+  const s = String(v).trim();
+  if (!s) return null;
+  // dd/mm/yyyy
+  const dm = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if (dm) return `${dm[3].length === 2 ? '20' + dm[3] : dm[3]}-${dm[2].padStart(2, '0')}-${dm[1].padStart(2, '0')}`;
+  return s;
+};
+
+export const bulkCreateVehicles = async (rows, onProgress) => {
+  let nextNo = await getNextNo();
+  let done = 0;
+  const errors = [];
+
+  for (const raw of rows) {
+    const data = {};
+    for (const [k, v] of Object.entries(raw)) {
+      const key = COL_MAP[k.toLowerCase().trim()];
+      if (key) data[key] = v;
+    }
+    if (!data.brand || !data.model) { errors.push(`Row ${nextNo}: missing brand/model — skipped`); done++; onProgress?.(done, rows.length); continue; }
+
+    const cost = toNum(data.cost);
+    const sell = toNum(data.sell_price);
+    const income = toNum(data.income) ?? (cost && sell ? sell - cost : null);
+
+    try {
+      await addDoc(collection(db, COL), {
+        no: nextNo++,
+        status: data.status || null,
+        type: data.type || null,
+        brand: data.brand,
+        model: data.model,
+        year: data.year || null,
+        chassis: data.chassis || null,
+        colour: data.colour || null,
+        mileage: data.mileage || null,
+        grade: data.grade || null,
+        lc_date: normalizeDate(data.lc_date),
+        lc_num: data.lc_num || null,
+        tt_lkr: toNum(data.tt_lkr),
+        lc_lkr: toNum(data.lc_lkr),
+        duty: toNum(data.duty),
+        others: toNum(data.others),
+        cusdec: data.cusdec || null,
+        clear_date: normalizeDate(data.clear_date),
+        cost,
+        sell_date: normalizeDate(data.sell_date),
+        sell_price: sell,
+        income,
+        contact: data.contact || null,
+        notes: data.notes || null,
+        imageUrl: null,
+        createdAt: serverTimestamp(),
+      });
+    } catch (e) {
+      errors.push(`Row ${nextNo - 1}: ${e.message}`);
+    }
+    done++;
+    onProgress?.(done, rows.length);
+  }
+  return errors;
+};
