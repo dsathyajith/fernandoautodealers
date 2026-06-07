@@ -27,20 +27,17 @@ export const getNextNo = async () => {
   return max + 1;
 };
 
-const uploadImage = async (file, vehicleId) => {
-  const imgRef = ref(storage, `vehicles/${vehicleId}_${Date.now()}`);
-  await uploadBytes(imgRef, file);
-  return getDownloadURL(imgRef);
+const uploadPdf = async (file, vehicleId, tag) => {
+  const pdfRef = ref(storage, `vehicles/${vehicleId}_${tag}_${Date.now()}.pdf`);
+  await uploadBytes(pdfRef, file);
+  return getDownloadURL(pdfRef);
 };
 
-export const createVehicle = async (data, imageFile) => {
-  const no = await getNextNo();
+const basePayload = (data) => {
   const cost = toNum(data.cost);
   const sell = toNum(data.sell_price);
   const income = toNum(data.income) ?? (cost && sell ? sell - cost : null);
-
-  const docRef = await addDoc(collection(db, COL), {
-    no,
+  return {
     status: data.status || null,
     type: data.type || null,
     brand: data.brand,
@@ -63,58 +60,42 @@ export const createVehicle = async (data, imageFile) => {
     sell_price: sell,
     income,
     contact: data.contact || null,
+    customer_name: data.customer_name || null,
+    reg_status: data.reg_status || 'UNREGISTERED',
+    reg_num: data.reg_num || null,
     notes: data.notes || null,
+  };
+};
+
+export const createVehicle = async (data, lcPdfFile = null, cusdecPdfFile = null) => {
+  const no = await getNextNo();
+  const docRef = await addDoc(collection(db, COL), {
+    no,
+    ...basePayload(data),
+    lc_pdf_url: null,
+    cusdec_pdf_url: null,
     imageUrl: null,
-    createdAt: serverTimestamp()
+    createdAt: serverTimestamp(),
   });
 
-  if (imageFile) {
-    const url = await uploadImage(imageFile, docRef.id);
-    await updateDoc(docRef, { imageUrl: url });
-  }
+  const updates = {};
+  if (lcPdfFile)     updates.lc_pdf_url     = await uploadPdf(lcPdfFile,     docRef.id, 'lc');
+  if (cusdecPdfFile) updates.cusdec_pdf_url = await uploadPdf(cusdecPdfFile, docRef.id, 'cusdec');
+  if (Object.keys(updates).length) await updateDoc(docRef, updates);
 
   return { id: docRef.id, no };
 };
 
-export const updateVehicle = async (id, data, imageFile) => {
-  const cost = toNum(data.cost);
-  const sell = toNum(data.sell_price);
-  const income = toNum(data.income) ?? (cost && sell ? sell - cost : null);
+export const updateVehicle = async (id, data, lcPdfFile = null, cusdecPdfFile = null) => {
+  const payload = basePayload(data);
 
-  const payload = {
-    status: data.status || null,
-    type: data.type || null,
-    brand: data.brand,
-    model: data.model,
-    year: data.year || null,
-    chassis: data.chassis || null,
-    colour: data.colour || null,
-    mileage: data.mileage || null,
-    grade: data.grade || null,
-    lc_date: data.lc_date || null,
-    lc_num: data.lc_num || null,
-    tt_lkr: toNum(data.tt_lkr),
-    lc_lkr: toNum(data.lc_lkr),
-    duty: toNum(data.duty),
-    others: toNum(data.others),
-    cusdec: data.cusdec || null,
-    clear_date: data.clear_date || null,
-    cost,
-    sell_date: data.sell_date || null,
-    sell_price: sell,
-    income,
-    contact: data.contact || null,
-    notes: data.notes || null
-  };
-
-  if (imageFile) {
-    payload.imageUrl = await uploadImage(imageFile, id);
-  }
+  if (lcPdfFile)     payload.lc_pdf_url     = await uploadPdf(lcPdfFile,     id, 'lc');
+  if (cusdecPdfFile) payload.cusdec_pdf_url = await uploadPdf(cusdecPdfFile, id, 'cusdec');
 
   await updateDoc(doc(db, COL, id), payload);
 };
 
-export const sellVehicle = async (id, { sell_price, sell_date, contact }) => {
+export const sellVehicle = async (id, { sell_price, sell_date, contact, customer_name, reg_status, reg_num }) => {
   const vehicle = await getVehicle(id);
   if (!vehicle) throw new Error('Vehicle not found');
 
@@ -132,6 +113,9 @@ export const sellVehicle = async (id, { sell_price, sell_date, contact }) => {
     sell_price: sell,
     sell_date: sell_date || null,
     contact: contact || null,
+    customer_name: customer_name || null,
+    reg_status: reg_status || 'UNREGISTERED',
+    reg_num: reg_num || null,
     income
   });
 

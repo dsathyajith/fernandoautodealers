@@ -8,17 +8,25 @@ const fmtD = d => { if (!d) return '—'; const s = d.split('T')[0]; const [y, m
 const fc = v => { const t = parseFloat(v.tt_lkr) || 0, l = parseFloat(v.lc_lkr) || 0, d = parseFloat(v.duty) || 0, o = parseFloat(v.others) || 0; return (t + l + d + o) || parseFloat(v.cost) || 0; };
 
 function QuickSellModal({ open, vehicle, finalCost, onClose, onDone, showToast }) {
-  const [sell, setSell] = useState('');
-  const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
-  const [contact, setContact] = useState('');
-  const [saving, setSaving] = useState(false);
+  const [sell, setSell]               = useState('');
+  const [date, setDate]               = useState(() => new Date().toISOString().split('T')[0]);
+  const [contact, setContact]         = useState('');
+  const [customerName, setCustomerName] = useState('');
+  const [regStatus, setRegStatus]     = useState('UNREGISTERED');
+  const [regNum, setRegNum]           = useState('');
+  const [saving, setSaving]           = useState(false);
   const inc = sell && finalCost ? parseFloat(sell) - finalCost : null;
 
   const doSell = async () => {
     if (!sell || !date) { showToast('Enter sell price and date', 'err'); return; }
     setSaving(true);
     try {
-      const income = await sellVehicle(vehicle.id, { sell_price: sell, sell_date: date, contact });
+      const income = await sellVehicle(vehicle.id, {
+        sell_price: sell, sell_date: date, contact,
+        customer_name: customerName,
+        reg_status: regStatus,
+        reg_num: regNum,
+      });
       showToast(`Sold! Income: LKR ${fmt(income)}`, 'ok');
       onDone();
       onClose();
@@ -29,6 +37,14 @@ function QuickSellModal({ open, vehicle, finalCost, onClose, onDone, showToast }
     }
   };
 
+  /* Reset fields when modal opens for a new vehicle */
+  useEffect(() => {
+    if (open) {
+      setSell(''); setDate(new Date().toISOString().split('T')[0]);
+      setContact(''); setCustomerName(''); setRegStatus('UNREGISTERED'); setRegNum('');
+    }
+  }, [open, vehicle?.id]);
+
   if (!open) return null;
   return (
     <div className="modal-overlay open" onClick={e => e.target === e.currentTarget && onClose()}>
@@ -37,6 +53,7 @@ function QuickSellModal({ open, vehicle, finalCost, onClose, onDone, showToast }
         <p style={{ color: 'var(--rl)', fontSize: '.76rem', marginBottom: 14 }}>
           {vehicle?.brand} {vehicle?.model} — #{vehicle?.no}
         </p>
+
         <div className="form-row">
           <label>Selling Price (LKR) *</label>
           <input type="number" value={sell} onChange={e => setSell(e.target.value)} placeholder="Enter selling price" />
@@ -50,10 +67,50 @@ function QuickSellModal({ open, vehicle, finalCost, onClose, onDone, showToast }
           <label>Selling Date *</label>
           <input type="date" value={date} onChange={e => setDate(e.target.value)} />
         </div>
+
+        {/* Buyer info */}
+        <div style={{ margin: '10px 0 4px', fontSize: '.65rem', color: 'var(--t3)', letterSpacing: '.6px', textTransform: 'uppercase' }}>Buyer Details</div>
         <div className="form-row">
-          <label>Buyer Contact</label>
+          <label>Customer Name</label>
+          <input value={customerName} onChange={e => setCustomerName(e.target.value)} placeholder="Full name of buyer" />
+        </div>
+        <div className="form-row">
+          <label>Contact (Phone)</label>
           <input value={contact} onChange={e => setContact(e.target.value)} placeholder="07X XXX XXXX" />
         </div>
+
+        {/* Registration */}
+        <div style={{ margin: '10px 0 4px', fontSize: '.65rem', color: 'var(--t3)', letterSpacing: '.6px', textTransform: 'uppercase' }}>Registration</div>
+        <div className="form-row">
+          <label>Vehicle Registration</label>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {['UNREGISTERED', 'REGISTERED'].map(opt => (
+              <button key={opt} onClick={() => setRegStatus(opt)}
+                style={{
+                  flex: 1, padding: '8px 0', borderRadius: 7, fontSize: '.72rem', fontWeight: 700,
+                  border: `1px solid ${regStatus === opt ? (opt === 'REGISTERED' ? 'rgba(96,165,250,.5)' : 'rgba(251,146,60,.5)') : 'var(--br)'}`,
+                  background: regStatus === opt ? (opt === 'REGISTERED' ? 'rgba(96,165,250,.15)' : 'rgba(251,146,60,.12)') : 'var(--bg3)',
+                  color: regStatus === opt ? (opt === 'REGISTERED' ? '#93c5fd' : '#fb923c') : 'var(--t3)',
+                  cursor: 'pointer',
+                }}>
+                <i className={`fa ${opt === 'REGISTERED' ? 'fa-id-card' : 'fa-circle-xmark'}`} style={{ marginRight: 5 }} />
+                {opt === 'REGISTERED' ? 'Registered' : 'Unregistered'}
+              </button>
+            ))}
+          </div>
+        </div>
+        {regStatus === 'REGISTERED' && (
+          <div className="form-row">
+            <label>Registration Number</label>
+            <input
+              value={regNum}
+              onChange={e => setRegNum(e.target.value.toUpperCase())}
+              placeholder="CCB 1717"
+              style={{ textTransform: 'uppercase', fontFamily: 'monospace', letterSpacing: '.5px' }}
+            />
+          </div>
+        )}
+
         <div className="modal-actions">
           <button className="btn-cancel" onClick={onClose}>Cancel</button>
           <button className="btn-green" onClick={doSell} disabled={saving}>
@@ -202,6 +259,12 @@ export default function Vehicles({ showToast, defaultStatus = '' }) {
   const [brand, setBrand] = useState('');
   const [type, setType] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
+
+  /* Sync filter when navigating between /inhand and /onway */
+  useEffect(() => {
+    setStatus(defaultStatus);
+    setPage(1);
+  }, [defaultStatus]);
   const [editVehicle, setEditVehicle] = useState(null);
   const [qsOpen, setQsOpen] = useState(false);
   const [qsVehicle, setQsVehicle] = useState(null);

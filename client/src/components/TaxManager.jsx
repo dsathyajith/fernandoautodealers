@@ -1,9 +1,55 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { getVehicles } from '../services/vehicleService';
 import { getTaxMonths, getTaxEntries, saveTaxEntry, deleteTaxEntry, deleteSlip } from '../services/taxService';
 
 const fmt = n => n == null ? '—' : Number(n).toLocaleString('en-LK', { maximumFractionDigits: 0 });
 const fmtD = d => { if (!d) return '—'; const s = d.split('T')[0]; const [y, m, dy] = s.split('-'); return `${dy}/${m}/${y}`; };
+
+function PdfViewer({ url, title, onClose }) {
+  useEffect(() => {
+    const h = e => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, [onClose]);
+  return (
+    <div
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 9999,
+        background: 'rgba(0,0,0,.82)',
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center', padding: 16,
+      }}
+    >
+      <div style={{ width: '100%', maxWidth: 920, display: 'flex', alignItems: 'center',
+        justifyContent: 'space-between', marginBottom: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <i className="fa fa-file" style={{ color: '#ef4444', fontSize: '1.1rem' }} />
+          <span style={{ fontSize: '.82rem', fontWeight: 700, color: '#fff', letterSpacing: '.5px' }}>{title}</span>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <a href={url} target="_blank" rel="noreferrer"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6,
+              padding: '7px 14px', borderRadius: 8, fontSize: '.72rem', fontWeight: 700,
+              background: 'rgba(96,165,250,.15)', color: '#93c5fd',
+              border: '1px solid rgba(96,165,250,.3)', textDecoration: 'none' }}>
+            <i className="fa fa-arrow-up-right-from-square" /> Open in Browser
+          </a>
+          <button onClick={onClose}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6,
+              padding: '7px 14px', borderRadius: 8, fontSize: '.72rem', fontWeight: 700,
+              background: 'rgba(239,68,68,.15)', color: '#fca5a5',
+              border: '1px solid rgba(239,68,68,.3)', cursor: 'pointer' }}>
+            <i className="fa fa-xmark" /> Close
+          </button>
+        </div>
+      </div>
+      <iframe src={url} title={title}
+        style={{ width: '100%', maxWidth: 920, height: 'min(80vh, 900px)',
+          border: 'none', borderRadius: 10, background: '#fff' }} />
+    </div>
+  );
+}
 
 export default function TaxManager({ showToast }) {
   const [months, setMonths] = useState([]);
@@ -13,6 +59,10 @@ export default function TaxManager({ showToast }) {
   const [monthVehicles, setMonthVehicles] = useState([]);
   const [form, setForm] = useState({ sscl: '', vat_amount: '', notes: '' });
   const [saving, setSaving] = useState(false);
+  const [pdfUrl, setPdfUrl]     = useState(null);
+  const [pdfTitle, setPdfTitle] = useState('');
+  const openPdf  = useCallback((url, title) => { setPdfUrl(url); setPdfTitle(title); }, []);
+  const closePdf = useCallback(() => setPdfUrl(null), []);
   const ssclRef = useRef();
   const vatRef = useRef();
 
@@ -100,6 +150,7 @@ export default function TaxManager({ showToast }) {
 
   return (
     <>
+      {pdfUrl && <PdfViewer url={pdfUrl} title={pdfTitle} onClose={closePdf} />}
       {/* Add/Edit Form */}
       <div className="card" style={{ marginBottom: 16 }}>
         <div className="card-header">
@@ -181,9 +232,10 @@ export default function TaxManager({ showToast }) {
                   <input ref={ssclRef} type="file" accept=".pdf,.jpg,.jpeg,.png" />
                   {curMonth?.sscl_slip && (
                     <div style={{ marginTop: 5, display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <a href={curMonth.sscl_slip} target="_blank" rel="noreferrer" className="slip-thumb">
-                        <i className="fa fa-file" /> {curMonth.sscl_slip_name || curMonth.sscl_slip}
-                      </a>
+                      <button className="slip-thumb" onClick={() => openPdf(curMonth.sscl_slip, 'SSCL Payment Slip')}
+                        style={{ cursor: 'pointer', border: 'none', background: 'none', padding: 0 }}>
+                        <i className="fa fa-file" /> {curMonth.sscl_slip_name || 'View SSCL Slip'}
+                      </button>
                       <button className="ac del" onClick={() => delSlip(selMonth, 'sscl')}><i className="fa fa-times" /></button>
                     </div>
                   )}
@@ -193,9 +245,10 @@ export default function TaxManager({ showToast }) {
                   <input ref={vatRef} type="file" accept=".pdf,.jpg,.jpeg,.png" />
                   {curMonth?.vat_slip && (
                     <div style={{ marginTop: 5, display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <a href={curMonth.vat_slip} target="_blank" rel="noreferrer" className="slip-thumb">
-                        <i className="fa fa-file" /> {curMonth.vat_slip_name || curMonth.vat_slip}
-                      </a>
+                      <button className="slip-thumb" onClick={() => openPdf(curMonth.vat_slip, 'VAT Payment Slip')}
+                        style={{ cursor: 'pointer', border: 'none', background: 'none', padding: 0 }}>
+                        <i className="fa fa-file" /> {curMonth.vat_slip_name || 'View VAT Slip'}
+                      </button>
                       <button className="ac del" onClick={() => delSlip(selMonth, 'vat')}><i className="fa fa-times" /></button>
                     </div>
                   )}
@@ -252,8 +305,8 @@ export default function TaxManager({ showToast }) {
                     <td className="amt">{fmt(e.vat_amount)}</td>
                     <td className="amt" style={{ color: 'var(--a)' }}>{fmt(totalTax)}</td>
                     <td style={{ fontSize: '.72rem', color: 'var(--t3)', maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{e.notes || '—'}</td>
-                    <td>{e.sscl_slip ? <a href={e.sscl_slip} target="_blank" rel="noreferrer" className="slip-thumb"><i className="fa fa-file" /> View</a> : <span style={{ fontSize: '.7rem', color: 'var(--t3)' }}>—</span>}</td>
-                    <td>{e.vat_slip ? <a href={e.vat_slip} target="_blank" rel="noreferrer" className="slip-thumb"><i className="fa fa-file" /> View</a> : <span style={{ fontSize: '.7rem', color: 'var(--t3)' }}>—</span>}</td>
+                    <td>{e.sscl_slip ? <button className="slip-thumb" onClick={() => openPdf(e.sscl_slip, `SSCL Slip — ${e.month_label}`)} style={{ cursor: 'pointer', border: 'none', background: 'none', padding: 0 }}><i className="fa fa-file" /> View</button> : <span style={{ fontSize: '.7rem', color: 'var(--t3)' }}>—</span>}</td>
+                    <td>{e.vat_slip  ? <button className="slip-thumb" onClick={() => openPdf(e.vat_slip,  `VAT Slip — ${e.month_label}`)}  style={{ cursor: 'pointer', border: 'none', background: 'none', padding: 0 }}><i className="fa fa-file" /> View</button> : <span style={{ fontSize: '.7rem', color: 'var(--t3)' }}>—</span>}</td>
                     <td>
                       <button className="ac del" onClick={() => delEntry(e.month_key)}><i className="fa fa-trash" /></button>
                     </td>

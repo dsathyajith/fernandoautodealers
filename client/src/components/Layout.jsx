@@ -6,10 +6,9 @@ import Dashboard from './Dashboard';
 import Vehicles from './Vehicles';
 import LCTracker from './LCTracker';
 import ProfitReport from './ProfitReport';
-import Messages from './Messages';
-import PriceRequests from './PriceRequests';
-import Meetings from './Meetings';
 import TaxManager from './TaxManager';
+import CustomerDetails from './CustomerDetails';
+import Documents from './Documents';
 import Users from './Users';
 import Settings from './Settings';
 
@@ -21,9 +20,8 @@ const SECTIONS = [
   { key: 'inhand', icon: 'fa-warehouse', label: 'In Hand', group: 'Status', badge: 'inhand' },
   { key: 'onway', icon: 'fa-ship', label: 'On The Way', group: 'Status', badge: 'onway' },
   { key: 'taxreport', icon: 'fa-file-invoice-dollar', label: 'VAT & SSCL', group: 'Finance' },
-  { key: 'messages', icon: 'fa-envelope', label: 'Messages', group: 'Enquiries', badge: 'msgs' },
-  { key: 'pricereq', icon: 'fa-tag', label: 'Price Requests', group: 'Enquiries', badge: 'prs' },
-  { key: 'meetings', icon: 'fa-calendar-check', label: 'Meetings', group: 'Enquiries', badge: 'meets' },
+  { key: 'customers', icon: 'fa-address-book', label: 'Customer Details', group: 'Customer' },
+  { key: 'documents', icon: 'fa-folder-open', label: 'Documents', group: 'Customer' },
   { key: 'users', icon: 'fa-users', label: 'User Accounts', group: 'Management' },
   { key: 'settings', icon: 'fa-gear', label: 'Settings', group: 'Management' },
 ];
@@ -31,8 +29,8 @@ const SECTIONS = [
 const TITLES = {
   dashboard: 'DASHBOARD', vehicles: 'VEHICLE REGISTER', lc: 'LC TRACKER',
   profit: 'PROFIT REPORT', inhand: 'IN HAND', onway: 'ON THE WAY',
-  taxreport: 'VAT & SSCL', messages: 'MESSAGES', pricereq: 'PRICE REQUESTS',
-  meetings: 'MEETINGS', users: 'USER ACCOUNTS', settings: 'SETTINGS'
+  taxreport: 'VAT & SSCL', customers: 'CUSTOMER DETAILS', documents: 'VEHICLE DOCUMENTS',
+  users: 'USER ACCOUNTS', settings: 'SETTINGS'
 };
 
 function Clock({ tz, label, flag }) {
@@ -65,14 +63,14 @@ export default function Layout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [badges, setBadges] = useState({ inhand: 0, onway: 0, msgs: 0, prs: 0, meets: 0 });
+  const [badges, setBadges] = useState({ inhand: 0, onway: 0 });
   const [toast, setToast] = useState({ message: '', type: 'ok', visible: false });
 
   const section = location.pathname.replace('/', '') || 'dashboard';
 
   useEffect(() => {
     getDashboardStats().then(d => {
-      setBadges({ inhand: d.inhand, onway: d.onway, msgs: d.msgs, prs: d.prs, meets: d.meets });
+      setBadges({ inhand: d.inhand, onway: d.onway });
     }).catch(() => {});
   }, [section]);
 
@@ -157,10 +155,9 @@ export default function Layout() {
             <Route path="/onway" element={<Vehicles showToast={showToast} defaultStatus="ON THE WAY" />} />
             <Route path="/lc" element={<LCTracker showToast={showToast} />} />
             <Route path="/profit" element={<ProfitReport showToast={showToast} />} />
-            <Route path="/messages" element={<Messages showToast={showToast} />} />
-            <Route path="/pricereq" element={<PriceRequests showToast={showToast} />} />
-            <Route path="/meetings" element={<Meetings showToast={showToast} />} />
             <Route path="/taxreport" element={<TaxManager showToast={showToast} />} />
+            <Route path="/customers" element={<CustomerDetails showToast={showToast} />} />
+            <Route path="/documents" element={<Documents showToast={showToast} />} />
             <Route path="/users" element={<Users showToast={showToast} />} />
             <Route path="/settings" element={<Settings showToast={showToast} />} />
           </Routes>

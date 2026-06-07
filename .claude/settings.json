@@ -14,7 +14,8 @@
       "Bash(git -C \"d:/react-app\" log --oneline -5)",
       "Bash(git -C \"d:/react-app\" ls-files client/src/index.css)",
       "Bash(gh run *)",
-      "Bash(node import-vehicles.mjs)"
+      "Bash(node import-vehicles.mjs)",
+      "Bash(npx tsc *)"
     ]
   }
 }
