@@ -272,6 +272,7 @@ select.filter option { background: var(--bg3); }
 /* QUICK SELL MODAL */
 .qs-box { background: var(--bg2); border: 1px solid var(--br2); border-radius: 16px; padding: 22px; width: 100%; max-width: 380px; animation: popup .22s ease; max-height: 90vh; overflow-y: auto; }
 .qs-box h3 { font-family: 'Josefin Sans', sans-serif; font-size: .88rem; letter-spacing: 2px; color: #fff; margin-bottom: 6px; }
+.sell-section-hdr { font-size: .62rem; color: var(--t3); letter-spacing: .8px; text-transform: uppercase; margin: 10px 0 4px; font-weight: 600; }
 
 /* MESSAGES */
 .msg { background: var(--bg2); border: 1px solid var(--br); border-radius: 10px; padding: 14px 15px; margin-bottom: 10px; }

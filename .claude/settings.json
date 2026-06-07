@@ -15,7 +15,10 @@
       "Bash(git -C \"d:/react-app\" ls-files client/src/index.css)",
       "Bash(gh run *)",
       "Bash(node import-vehicles.mjs)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(node -e \"const fs=require\\('fs'\\);const data=fs.readFileSync\\('client/src/assests/aboutaaa.png'\\);console.log\\('data:image/png;base64,'+data.toString\\('base64'\\)\\);\")",
+      "Bash(node -e \"const fs=require\\('fs'\\);const data=fs.readFileSync\\('client/src/assests/aboutaaa.png'\\);const b64='data:image/png;base64,'+data.toString\\('base64'\\);fs.writeFileSync\\('logo_b64.txt',b64\\);console.log\\('size:',b64.length\\);\")",
+      "Bash(npx vite *)"
     ]
   }
 }

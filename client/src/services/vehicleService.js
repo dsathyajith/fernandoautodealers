@@ -43,6 +43,10 @@ const basePayload = (data) => {
     brand: data.brand,
     model: data.model,
     year: data.year || null,
+    engine_num: data.engine_num || null,
+    model_code: data.model_code || null,
+    origin: data.origin || null,
+    fuel_type: data.fuel_type || null,
     chassis: data.chassis || null,
     colour: data.colour || null,
     mileage: data.mileage || null,
@@ -61,8 +65,16 @@ const basePayload = (data) => {
     income,
     contact: data.contact || null,
     customer_name: data.customer_name || null,
+    buyer_address: data.buyer_address || null,
     reg_status: data.reg_status || 'UNREGISTERED',
     reg_num: data.reg_num || null,
+    payment_type: data.payment_type || null,
+    advance_amount: toNum(data.advance_amount),
+    advance_date: data.advance_date || null,
+    vehicle_price: toNum(data.vehicle_price),
+    rmv_fee: toNum(data.rmv_fee),
+    lease_amount: toNum(data.lease_amount),
+    cash_amount: toNum(data.cash_amount),
     notes: data.notes || null,
   };
 };
@@ -95,7 +107,11 @@ export const updateVehicle = async (id, data, lcPdfFile = null, cusdecPdfFile = 
   await updateDoc(doc(db, COL, id), payload);
 };
 
-export const sellVehicle = async (id, { sell_price, sell_date, contact, customer_name, reg_status, reg_num }) => {
+export const sellVehicle = async (id, {
+  sell_price, sell_date, contact, customer_name, reg_status, reg_num,
+  payment_type, advance_amount, advance_date,
+  buyer_address, vehicle_price, rmv_fee, lease_amount, cash_amount,
+}) => {
   const vehicle = await getVehicle(id);
   if (!vehicle) throw new Error('Vehicle not found');
 
@@ -106,17 +122,55 @@ export const sellVehicle = async (id, { sell_price, sell_date, contact, customer
   const ot = vehicle.others || 0;
   const co = vehicle.cost || 0;
   const finalCost = (tt + lc + du + ot) > 0 ? (tt + lc + du + ot) : co;
-  const income = finalCost && sell ? sell - finalCost : null;
 
-  await updateDoc(doc(db, COL, id), {
-    status: 'SOLD',
+  const isAdvance = payment_type === 'ADVANCE';
+  const income = isAdvance ? null : (finalCost && sell ? sell - finalCost : null);
+
+  const update = {
     sell_price: sell,
     sell_date: sell_date || null,
     contact: contact || null,
     customer_name: customer_name || null,
     reg_status: reg_status || 'UNREGISTERED',
     reg_num: reg_num || null,
-    income
+    payment_type: payment_type || 'FULL',
+    buyer_address: buyer_address || null,
+    vehicle_price: parseFloat(vehicle_price) || null,
+    rmv_fee: parseFloat(rmv_fee) || null,
+    lease_amount: parseFloat(lease_amount) || null,
+    cash_amount: parseFloat(cash_amount) || null,
+  };
+
+  if (isAdvance) {
+    update.advance_amount = parseFloat(advance_amount) || null;
+    update.advance_date = advance_date || sell_date || null;
+    // status stays IN HAND
+  } else {
+    update.status = 'SOLD';
+    update.income = income;
+  }
+
+  await updateDoc(doc(db, COL, id), update);
+  return income;
+};
+
+export const completeAdvanceSale = async (id, { final_date } = {}) => {
+  const vehicle = await getVehicle(id);
+  if (!vehicle) throw new Error('Vehicle not found');
+
+  const sell = vehicle.sell_price || 0;
+  const tt = vehicle.tt_lkr || 0;
+  const lc = vehicle.lc_lkr || 0;
+  const du = vehicle.duty   || 0;
+  const ot = vehicle.others || 0;
+  const co = vehicle.cost   || 0;
+  const finalCost = (tt + lc + du + ot) > 0 ? (tt + lc + du + ot) : co;
+  const income = finalCost && sell ? sell - finalCost : null;
+
+  await updateDoc(doc(db, COL, id), {
+    status: 'SOLD',
+    income,
+    sell_date: final_date || vehicle.sell_date || null,
   });
 
   return income;

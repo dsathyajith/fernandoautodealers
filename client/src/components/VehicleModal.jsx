@@ -5,8 +5,10 @@ const fmt  = n => n == null ? '—' : Number(n).toLocaleString('en-LK', { maximu
 const fmtD = d => { if (!d) return '—'; const s = String(d).split('T')[0]; const [y, m, dy] = s.split('-'); return `${dy}/${m}/${y}`; };
 
 const EMPTY = {
-  status: 'ON THE WAY', type: 'IMPORT', brand: '', model: '', chassis: '', colour: '',
-  mileage: '', grade: '', lc_date: '', lc_num: '', tt_lkr: '', lc_lkr: '', duty: '',
+  status: 'ON THE WAY', type: 'IMPORT', brand: '', model: '', year: '',
+  chassis: '', colour: '', mileage: '', grade: '',
+  engine_num: '', model_code: '', origin: 'Japan', fuel_type: 'Petrol',
+  lc_date: '', lc_num: '', tt_lkr: '', lc_lkr: '', duty: '',
   others: '', cusdec: '', clear_date: '', cost: '', sell_date: '', sell_price: '', income: '',
   contact: '', customer_name: '', reg_status: 'UNREGISTERED', reg_num: '', notes: '',
 };
@@ -217,6 +219,29 @@ export default function VehicleModal({ open, vehicle, onClose, onSaved, showToas
             <div className="form-row">
               <label>Grade</label>
               <input value={form.grade} onChange={e => set('grade', e.target.value)} placeholder="S / 4.5 / 5" />
+            </div>
+            <div className="form-row">
+              <label>Year</label>
+              <input value={form.year} onChange={e => set('year', e.target.value)} placeholder="2024" />
+            </div>
+            <div className="form-row">
+              <label>Engine Number</label>
+              <input value={form.engine_num} onChange={e => set('engine_num', e.target.value)} placeholder="R06D-WA04C-K510493" />
+            </div>
+            <div className="form-row">
+              <label>Model Code</label>
+              <input value={form.model_code} onChange={e => set('model_code', e.target.value)} placeholder="5AA-MH95S" />
+            </div>
+            <div className="form-row">
+              <label>Country of Origin</label>
+              <input value={form.origin} onChange={e => set('origin', e.target.value)} placeholder="Japan" />
+            </div>
+            <div className="form-row">
+              <label>Fuel Type</label>
+              <input value={form.fuel_type} onChange={e => set('fuel_type', e.target.value)} placeholder="Petrol" />
+            </div>
+            <div className="form-row" style={{ gridColumn: '1 / -1', borderTop: '1px solid var(--br)', paddingTop: 8, marginTop: 2 }}>
+              <label style={{ color: 'var(--t3)', fontSize: '.55rem', letterSpacing: '1.5px' }}>LC &amp; IMPORT DETAILS</label>
             </div>
             <div className="form-row">
               <label>LC Date</label>

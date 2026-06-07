@@ -11,6 +11,7 @@ import CustomerDetails from './CustomerDetails';
 import Documents from './Documents';
 import Users from './Users';
 import Settings from './Settings';
+import AdvancePaid from './AdvancePaid';
 
 const SECTIONS = [
   { key: 'dashboard', icon: 'fa-chart-line', label: 'Dashboard', group: 'Main' },
@@ -19,6 +20,7 @@ const SECTIONS = [
   { key: 'profit', icon: 'fa-coins', label: 'Profit Report', group: 'Main' },
   { key: 'inhand', icon: 'fa-warehouse', label: 'In Hand', group: 'Status', badge: 'inhand' },
   { key: 'onway', icon: 'fa-ship', label: 'On The Way', group: 'Status', badge: 'onway' },
+  { key: 'advance', icon: 'fa-clock', label: 'Advance Paid', group: 'Status' },
   { key: 'taxreport', icon: 'fa-file-invoice-dollar', label: 'VAT & SSCL', group: 'Finance' },
   { key: 'customers', icon: 'fa-address-book', label: 'Customer Details', group: 'Customer' },
   { key: 'documents', icon: 'fa-folder-open', label: 'Documents', group: 'Customer' },
@@ -29,6 +31,7 @@ const SECTIONS = [
 const TITLES = {
   dashboard: 'DASHBOARD', vehicles: 'VEHICLE REGISTER', lc: 'LC TRACKER',
   profit: 'PROFIT REPORT', inhand: 'IN HAND', onway: 'ON THE WAY',
+  advance: 'ADVANCE PAID',
   taxreport: 'VAT & SSCL', customers: 'CUSTOMER DETAILS', documents: 'VEHICLE DOCUMENTS',
   users: 'USER ACCOUNTS', settings: 'SETTINGS'
 };
@@ -153,6 +156,7 @@ export default function Layout() {
             <Route path="/vehicles" element={<Vehicles showToast={showToast} />} />
             <Route path="/inhand" element={<Vehicles showToast={showToast} defaultStatus="IN HAND" />} />
             <Route path="/onway" element={<Vehicles showToast={showToast} defaultStatus="ON THE WAY" />} />
+            <Route path="/advance" element={<AdvancePaid showToast={showToast} />} />
             <Route path="/lc" element={<LCTracker showToast={showToast} />} />
             <Route path="/profit" element={<ProfitReport showToast={showToast} />} />
             <Route path="/taxreport" element={<TaxManager showToast={showToast} />} />
