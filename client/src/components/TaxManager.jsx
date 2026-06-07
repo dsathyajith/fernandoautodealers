@@ -158,7 +158,7 @@ export default function TaxManager({ showToast }) {
           <span style={{ fontSize: '.72rem', color: 'var(--t3)' }}>Select month → review vehicles → enter VAT & SSCL manually</span>
         </div>
         <div className="card-body">
-          <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: 16, alignItems: 'start', flexWrap: 'wrap' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16, alignItems: 'start' }}>
             <div>
               <div className="form-row">
                 <label>Select Month</label>

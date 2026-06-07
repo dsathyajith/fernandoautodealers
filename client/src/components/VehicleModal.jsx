@@ -299,7 +299,7 @@ export default function VehicleModal({ open, vehicle, onClose, onSaved, showToas
           <div style={{ padding: '0 2px' }}>
 
             {/* ── PDF Uploads ── */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 4 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 12, marginBottom: 4 }}>
               {/* LC PDF */}
               <div style={{ background: 'var(--bg3)', border: '1px solid var(--br)', borderRadius: 10, padding: '14px 14px 12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
@@ -348,7 +348,7 @@ export default function VehicleModal({ open, vehicle, onClose, onSaved, showToas
             {/* ── LC Tracker View ── */}
             <SectionHead icon="fa-file-invoice" label="LC Tracker" color="#60a5fa" />
             <div style={{ background: 'var(--bg3)', border: '1px solid var(--br)', borderRadius: 10, padding: '10px 14px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 24px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0 24px' }}>
                 <div>
                   <InfoRow label="LC Date"      value={fmtD(form.lc_date)} />
                   <InfoRow label="LC Number"    value={form.lc_num} />

@@ -18,6 +18,32 @@ a { text-decoration: none; }
 button { cursor: pointer; touch-action: manipulation; }
 img { max-width: 100%; }
 
+/* LOGIN */
+.login-page { font-family: 'Work Sans', sans-serif; background: #0a0a0a; color: #f0f0f0; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.login-box { width: 100%; max-width: 380px; padding: 44px 40px; background: #111; border: 1px solid rgba(255,255,255,.07); border-radius: 18px; box-shadow: 0 20px 60px rgba(0,0,0,.6); }
+.login-logo { text-align: center; margin-bottom: 30px; }
+.login-logo-inner { display: inline-flex; align-items: center; gap: 8px; }
+.login-dot { display: inline-block; width: 9px; height: 9px; background: #e53935; border-radius: 50%; box-shadow: 0 0 10px #e53935; flex-shrink: 0; }
+.login-h1 { font-family: 'Josefin Sans', sans-serif; font-size: 1.2rem; letter-spacing: 3px; text-transform: uppercase; color: #fff; }
+.login-sub { font-size: .68rem; color: #555; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 5px; }
+.login-err { background: rgba(229,57,53,.12); border: 1px solid rgba(229,57,53,.3); border-radius: 8px; padding: 10px 14px; font-size: .82rem; color: #ff6b6b; margin-bottom: 16px; text-align: center; }
+.login-field { margin-bottom: 16px; }
+.login-label { display: block; font-size: .67rem; color: #555; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 5px; }
+.login-input { width: 100%; padding: 12px 14px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); border-radius: 9px; color: #f0f0f0; font-size: .9rem; outline: none; font-family: 'Work Sans', sans-serif; box-sizing: border-box; transition: border-color .2s; }
+.login-input:focus { border-color: rgba(229,57,53,.5); }
+.login-btn { width: 100%; padding: 13px; background: linear-gradient(135deg,#e53935,#b71c1c); border: none; border-radius: 9px; color: #fff; font-size: .95rem; font-weight: 700; cursor: pointer; font-family: 'Josefin Sans', sans-serif; letter-spacing: 2px; transition: opacity .2s; }
+.login-btn:hover { opacity: .9; }
+.login-btn:disabled { opacity: .6; cursor: not-allowed; }
+@media (max-width: 480px) {
+  .login-box { padding: 32px 24px; border-radius: 14px; }
+  .login-h1 { font-size: 1.05rem; letter-spacing: 2px; }
+  .login-input { padding: 11px 12px; font-size: .88rem; }
+  .login-btn { padding: 12px; font-size: .88rem; }
+}
+@media (max-width: 360px) {
+  .login-box { padding: 26px 18px; }
+}
+
 /* SCROLLBAR */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: var(--bg2); }
@@ -155,7 +181,7 @@ tr:hover td { background: rgba(255,255,255,.015); }
 .sort-btn.on { background: rgba(229,57,53,.15); border-color: rgba(229,57,53,.3); color: var(--rl); }
 
 /* INPUTS / SELECTS */
-.search-wrap { position: relative; flex: 1; min-width: 120px; max-width: 200px; }
+.search-wrap { position: relative; flex: 1; min-width: 120px; max-width: 220px; }
 .search-wrap input { background: var(--bg3); border: 1px solid var(--br); color: var(--tx); padding: 7px 10px 7px 30px; border-radius: 7px; font-size: .76rem; outline: none; font-family: 'Work Sans', sans-serif; width: 100%; transition: border-color .2s; min-height: 34px; }
 .search-wrap input:focus { border-color: var(--r); }
 .search-wrap i { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: var(--t3); font-size: .7rem; pointer-events: none; }
@@ -296,16 +322,37 @@ select.filter option { background: var(--bg3); }
 
 /* ─── RESPONSIVE ──────────────────────────────────────────────── */
 
-/* Tablet & mobile sidebar toggle */
+/* Large desktop — make better use of wide screens */
+@media (min-width: 1400px) {
+  :root { --sw: 272px; }
+  .content { padding: 28px 32px; }
+  .topbar { padding: 12px 28px; }
+  .topbar-title { font-size: 1.02rem; letter-spacing: 2.5px; }
+  .stats-grid { grid-template-columns: repeat(auto-fit, minmax(172px, 1fr)); }
+  .sum-grid { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+  .stat-num { font-size: 1.65rem; }
+}
+
+/* Medium desktop — comfortable padding */
+@media (min-width: 1200px) and (max-width: 1399px) {
+  .content { padding: 24px 28px; }
+  .topbar { padding: 11px 24px; }
+}
+
+/* Tablet & mobile — sidebar collapses, hamburger appears */
 @media (max-width: 900px) {
   .sidebar { transform: translateX(-100%); box-shadow: none; }
   .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,.5); }
   .main { margin-left: 0; width: 100%; }
   .ham { display: flex !important; }
-  .clocks-bar { display: none; }
   .content { padding: 14px; }
   .topbar { padding: 8px 14px; }
   .topbar-title { font-size: .82rem; letter-spacing: 1.5px; }
+}
+
+/* Hide clocks only on small mobile; tablets (640–900px) still show them */
+@media (max-width: 640px) {
+  .clocks-bar { display: none; }
 }
 
 /* Tablet — compact layout */
@@ -335,10 +382,10 @@ select.filter option { background: var(--bg3); }
   .month-stats { grid-template-columns: 1fr 1fr; gap: 6px; padding: 0 10px 10px; }
   .mstat-val { font-size: .85rem; }
   .card-header { flex-direction: column; align-items: flex-start; gap: 8px; }
-  .card-header-right { width: 100%; }
-  .search-wrap { max-width: 100%; flex: 1; }
-  select.filter { flex: 1; min-width: 0; }
-  .btn-primary, .btn-secondary { font-size: .72rem; padding: 7px 10px; }
+  .card-header-right { width: 100%; flex-wrap: wrap; gap: 6px; }
+  .search-wrap { max-width: 100%; flex: 1 1 100%; }
+  select.filter { flex: 1 1 calc(50% - 4px); min-width: 0; }
+  .btn-primary, .btn-secondary { font-size: .72rem; padding: 7px 10px; min-height: 38px; }
   .modal-box { padding: 14px; max-height: 95vh; }
   .modal-box h3 { font-size: .8rem; letter-spacing: 1.5px; }
   .qs-box { padding: 16px; }
@@ -350,6 +397,11 @@ select.filter option { background: var(--bg3); }
   .pag { padding: 8px 12px; }
   .msg { padding: 12px; }
   .toast { font-size: .74rem; padding: 10px 13px; }
+  /* Larger touch targets on mobile */
+  .ac { min-height: 34px; padding: 5px 9px; font-size: .72rem; }
+  .nav-item { min-height: 46px; }
+  .pgb { min-height: 34px; padding: 5px 10px; }
+  .sort-btn { min-height: 30px; padding: 3px 8px; }
 }
 
 /* Small mobile */
@@ -359,7 +411,9 @@ select.filter option { background: var(--bg3); }
   .stat-num { font-size: 1.4rem; }
   .modal-grid { grid-template-columns: 1fr; }
   .sb-brand h2 { font-size: .78rem; letter-spacing: 2px; }
-  table { min-width: 380px; }
+  table { min-width: 320px; }
   th { padding: 7px 8px; }
   td { padding: 8px 8px; font-size: .72rem; }
+  select.filter { flex: 1 1 100%; }
+  .topbar-title { max-width: 160px; }
 }
