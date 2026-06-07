@@ -55,7 +55,7 @@ function MonthlyChart({ monthly, thisMonth, lastMonth, avgMonthly, winRate, prof
         <div className="chart-bars">
           {monthly.map(m => {
             const profit = parseFloat(m.profit) || 0;
-            const h = Math.max(4, Math.round(Math.abs(profit) / maxP * 110));
+            const h = Math.max(4, Math.round(Math.abs(profit) / maxP * 85));
             const isPos = profit >= 0;
             const col = isPos
               ? 'linear-gradient(to top,#16a34a,#22c55e)'
@@ -64,13 +64,14 @@ function MonthlyChart({ monthly, thisMonth, lastMonth, avgMonthly, winRate, prof
             const parts = m.month_label.split(' ');
             return (
               <div key={m.month_key} className="chart-col">
-                <div className="chart-val" style={{ color: isPos ? 'var(--g)' : 'var(--rl)' }}>{sv}</div>
                 <div className="chart-bar-wrap">
                   <div
                     className="chart-bar"
                     style={{ height: h, background: col }}
                     title={`${m.month_label} | ${m.count} sold | LKR ${fmt(profit)}`}
-                  />
+                  >
+                    <div className="chart-val" style={{ color: isPos ? 'var(--g)' : 'var(--rl)' }}>{sv}</div>
+                  </div>
                 </div>
                 <div className="chart-lbl">{parts[0]}<br /><span style={{ fontSize: '.53rem' }}>{parts[1] || ''}</span></div>
               </div>
