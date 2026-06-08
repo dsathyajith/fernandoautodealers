@@ -1,242 +1,318 @@
 import logoUrl from '../assests/aboutaaa.png';
 
-const fmt = n => {
+const fmtNum = n => {
   if (n == null || n === '' || isNaN(n)) return null;
   return Number(n).toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
+const fmtRs  = n => n != null ? 'Rs. '  + fmtNum(n) : null;
+const fmtLKR = n => n != null ? 'LKR '  + fmtNum(n) : null;
+
 const fmtDate = d => {
   if (!d) return '—';
   const s = String(d).split('T')[0];
-  const parts = s.split('-');
+  const [y, m, dy] = s.split('-');
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  return `${parseInt(parts[2])} ${months[parseInt(parts[1]) - 1]} ${parts[0]}`;
+  return `${parseInt(dy)} ${months[parseInt(m) - 1]} ${y}`;
 };
 
-const DIAMOND_SVG = `<svg width="76" height="76" viewBox="0 0 88 88" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <polygon points="44,2 86,44 44,86 2,44" stroke="#bbb" stroke-width="0.8" fill="none"/>
-  <polygon points="44,13 75,44 44,75 13,44" stroke="#bbb" stroke-width="0.8" fill="none"/>
-  <polygon points="44,24 64,44 44,64 24,44" stroke="#bbb" stroke-width="0.8" fill="none"/>
-  <polygon points="44,35 53,44 44,53 35,44" stroke="#bbb" stroke-width="0.8" fill="none"/>
-  <line x1="2" y1="44" x2="86" y2="44" stroke="#bbb" stroke-width="0.5"/>
-  <line x1="44" y1="2" x2="44" y2="86" stroke="#bbb" stroke-width="0.5"/>
-  <line x1="13" y1="13" x2="75" y2="75" stroke="#bbb" stroke-width="0.4"/>
-  <line x1="75" y1="13" x2="13" y2="75" stroke="#bbb" stroke-width="0.4"/>
-  <line x1="2" y1="44" x2="44" y2="2" stroke="#bbb" stroke-width="0.3"/>
-  <line x1="44" y1="2" x2="86" y2="44" stroke="#bbb" stroke-width="0.3"/>
-  <line x1="86" y1="44" x2="44" y2="86" stroke="#bbb" stroke-width="0.3"/>
-  <line x1="44" y1="86" x2="2" y2="44" stroke="#bbb" stroke-width="0.3"/>
+/* ── SVG FOOTER ICONS ─────────────────────────────────────────── */
+const IC_PHONE = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+  stroke="#181818" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="6" y="2" width="12" height="20" rx="2"/><line x1="11" y1="18" x2="13" y2="18"/>
+</svg>`;
+const IC_MAIL = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+  stroke="#181818" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="3" y="5" width="18" height="14" rx="2"/><polyline points="3,7 12,13 21,7"/>
+</svg>`;
+const IC_PIN = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+  stroke="#181818" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M12 2 C 8 2,5 5,5 9 C 5 14,12 22,12 22 C 12 22,19 14,19 9 C 19 5,16 2,12 2 Z"/>
+  <circle cx="12" cy="9" r="2.5"/>
 </svg>`;
 
 const CSS = `
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:'Work Sans',Arial,sans-serif;background:#ebebeb;color:#111;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-
-  /* A4 page — flex column so footer sticks to bottom */
-  .page{
-    width:794px;
-    min-height:1060px;
-    background:#fff;
-    margin:14px auto;
-    padding:30px 44px 0 44px;
-    box-shadow:0 4px 24px rgba(0,0,0,.15);
-    display:flex;
-    flex-direction:column;
+  :root {
+    --red:   #ed1c24;
+    --ink:   #181818;
+    --muted: #6b6b6b;
+    --line:  #a8caea;
+    --paper: #ffffff;
   }
-  .page-body{flex:1 0 auto;}
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Mulish', system-ui, sans-serif;
+    background: #e7e9ec;
+    color: var(--ink);
+    padding: 28px 16px;
+    -webkit-font-smoothing: antialiased;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* ── PAGE ── */
+  .invoice {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    background: var(--paper);
+    padding: 16mm 18mm 14mm;
+    box-shadow: 0 18px 48px rgba(0,0,0,.12);
+    display: flex;
+    flex-direction: column;
+  }
+  .inv-body { flex: 1; }
 
   /* ── HEADER ── */
-  .inv-hdr{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:16px;border-bottom:2px solid #111}
-  .logo-img{height:66px;width:auto;object-fit:contain;flex-shrink:0}
-  .co-name{text-align:center;flex:1;padding:0 8px}
-  .co-name h1{font-family:'Josefin Sans',sans-serif;font-size:25px;font-weight:700;color:#e53935;letter-spacing:3.5px;text-transform:uppercase;line-height:1.15}
-  .co-name p{font-size:8.5px;letter-spacing:4px;text-transform:uppercase;color:#999;margin-top:3px}
-  .dia-wrap{width:76px;height:76px;flex-shrink:0}
-
-  /* ── INVOICE TITLE ── */
-  .inv-title{display:flex;align-items:stretch;margin:14px 0 12px}
-  .title-bar{width:8px;background:#e53935;border-radius:2px;margin-right:13px;flex-shrink:0}
-  .title-txt{font-family:'Work Sans',sans-serif;font-size:34px;font-weight:900;color:#111;letter-spacing:.2px;line-height:1.05}
-
-  /* ── RECIPIENT ROW ── */
-  .inv-to{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding-bottom:10px}
-  .to-left{flex:1;min-width:0}
-  .to-lbl{font-size:9.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#999;margin-bottom:3px}
-  .to-name{font-size:17px;font-weight:800;margin-bottom:4px;line-height:1.2;color:#111}
-  .to-addr{font-size:12px;line-height:1.7;color:#444}
-  .to-right{text-align:right;white-space:nowrap;padding-top:2px;flex-shrink:0}
-  .date-lbl{font-size:9.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#999;margin-bottom:3px}
-  .date-val{font-size:13.5px;font-weight:700;color:#111}
-
-  /* ── DIVIDERS + DESC HEADER ── */
-  .hr{border:none;border-top:1.8px solid #111;margin:6px 0}
-  .hr-thin{border:none;border-top:1px solid #ddd;margin:5px 0}
-  .desc-hdr{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#555;padding:5px 0}
-
-  /* ── VEHICLE DETAIL TABLE ── */
-  .vehicle-name{font-size:14px;font-weight:800;letter-spacing:.3px;padding:6px 0 4px;color:#111}
-  .vd-table{width:100%;border-collapse:collapse;margin:2px 0 8px}
-  .vd-table tr{border-bottom:1px solid #f0f0f0}
-  .vd-table tr:last-child{border-bottom:none}
-  .vd-lbl{font-size:11.5px;color:#888;font-weight:600;padding:3px 14px 3px 0;width:145px;white-space:nowrap;vertical-align:top}
-  .vd-val{font-size:11.5px;color:#111;font-weight:600;padding:3px 0;vertical-align:top}
-
-  /* ── PAYMENT BREAKDOWN ── */
-  .lc-block{font-size:12.5px;line-height:1.8;padding:4px 0 2px;color:#222}
-  .item-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:13px}
-  .item-row+.item-row{border-top:1px solid #f2f2f2}
-  .item-lbl{font-weight:600;color:#333}
-  .item-val{font-weight:600;color:#111;font-family:'Josefin Sans',sans-serif;letter-spacing:.3px}
-  .item-row.total-row .item-lbl{font-weight:800;color:#111}
-  .item-row.total-row .item-val{font-weight:800;color:#111}
-
-  /* ── PAYMENT BADGE ── */
-  .inv-pay{display:flex;justify-content:flex-end;margin:16px 0 12px}
-  .pay-badge{
-    background:#e53935;color:#fff;
-    font-family:'Josefin Sans',sans-serif;font-size:11.5px;font-weight:700;
-    letter-spacing:2.5px;padding:11px 20px;text-transform:uppercase;
-    white-space:nowrap;display:flex;align-items:center;
+  .header {
+    text-align: center;
+    margin-bottom: 32px;
   }
-  .pay-amt{
-    background:#f5f5f5;border:1.5px solid #ddd;border-left:none;
-    font-family:'Josefin Sans',sans-serif;font-size:16px;font-weight:700;
-    color:#111;padding:11px 24px;letter-spacing:.5px;white-space:nowrap;
+  .logo-img {
+    width: 160px;
+    height: auto;
+    display: block;
+    margin: 0 auto 14px;
+  }
+  .brand {
+    text-align: center;
+    font-weight: 900;
+    font-size: 24px;
+    color: var(--red);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    line-height: 1.2;
   }
 
-  /* ── SIGNATURES — generous space above lines ── */
-  .inv-sigs{display:flex;justify-content:space-between;align-items:flex-end;padding:6px 2px 18px}
-  .sig-block{min-width:190px}
-  .sig-space{height:52px}
-  .sig-line{border-top:1.5px solid #111;width:190px;margin-bottom:7px}
-  .sig-dashes{
-    font-size:14px;letter-spacing:3px;color:#aaa;
-    border-bottom:1.5px solid #111;
-    width:190px;margin-bottom:7px;
-    padding-bottom:4px;text-align:right;
+  /* ── TITLE ── */
+  .title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 0 0 26px;
   }
-  .sig-lbl{font-size:11.5px;font-weight:700;letter-spacing:.5px;color:#333}
-  .sig-block-right{text-align:right;min-width:190px}
+  .title-mark { width: 32px; height: 28px; background: var(--red); flex-shrink: 0; }
+  .title {
+    font-size: 36px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    margin: 0;
+    line-height: 1;
+  }
 
-  /* ── FOOTER — always at the bottom of the page ── */
-  .page-footer{
-    margin-top:auto;
-    padding-top:12px;
-    flex-shrink:0;
+  /* ── BUYER + DATE ROW ── */
+  .top-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 24px;
+    align-items: center;
+    padding-bottom: 14px;
+    border-bottom: 1.5px solid var(--line);
+    margin-bottom: 14px;
   }
-  .foot-hr{border:none;border-top:2px solid #111;margin-bottom:14px}
-  .foot{
-    display:flex;
-    align-items:flex-start;
-    padding-bottom:26px;
+  .to-block .to-lbl  { font-weight: 900; font-size: 14px; line-height: 1.2; margin-bottom: 5px; }
+  .buyer-name        { font-size: 22px; font-weight: 900; margin: 0 0 6px; line-height: 1.15; }
+  .buyer-addr        { line-height: 1.6; font-weight: 500; font-size: 13.5px; color: var(--ink); }
+  .date-block        { text-align: right; white-space: nowrap; }
+  .date-block .dlbl  { font-weight: 900; }
+  .date-block .dval  { margin-left: 10px; }
+
+  /* ── SECTION LABEL ── */
+  .section-label {
+    font-weight: 900;
+    font-size: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1.5px solid var(--line);
+    margin-bottom: 14px;
   }
-  .fitem{
-    flex:1;
-    display:flex;
-    align-items:flex-start;
-    gap:10px;
-    padding-right:16px;
+
+  /* ── DESCRIPTION BLOCK ── */
+  .desc {
+    line-height: 1.75;
+    font-weight: 500;
+    font-size: 13.5px;
+    color: var(--ink);
+    padding-bottom: 16px;
+    border-bottom: 1.5px solid var(--line);
+    margin-bottom: 16px;
   }
-  .fitem+.fitem{
-    border-left:1px solid #e0e0e0;
-    padding-left:16px;
-    padding-right:0;
+
+  /* ── LEASE BLOCK ── */
+  .lease-block {
+    padding-bottom: 14px;
+    border-bottom: 1.5px solid var(--line);
+    margin-bottom: 16px;
+    font-weight: 900;
+    font-size: 14px;
+    line-height: 1.75;
   }
-  .fitem:last-child{padding-right:0}
-  .ficon{
-    width:30px;height:30px;
-    border:1.5px solid #111;border-radius:4px;
-    display:flex;align-items:center;justify-content:center;
-    font-size:14px;flex-shrink:0;
+
+  /* ── ADVANCED price style (text lines, left-aligned) ── */
+  .adv-prices {
+    padding-bottom: 14px;
+    border-bottom: 1.5px solid var(--line);
+    margin-bottom: 14px;
+    font-weight: 900;
+    font-size: 14px;
+    line-height: 1.75;
   }
-  .ftxt .flbl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#444;margin-bottom:3px}
-  .ftxt .fval{font-size:10.5px;color:#555;line-height:1.6}
+  .adv-prices.selling {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 14px;
+  }
+
+  /* ── PILL / TOTAL ── */
+  .pill-wrap {
+    display: flex;
+    justify-content: flex-end;
+    margin: 28px 0 84px;
+  }
+  .pill {
+    display: inline-flex;
+    align-items: stretch;
+    font-weight: 900;
+    font-size: 15px;
+    min-width: 360px;
+  }
+  .pill-label {
+    background: var(--red);
+    color: #fff;
+    padding: 13px 26px;
+    display: flex;
+    align-items: center;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+  }
+  .pill-value {
+    background: #fff;
+    color: var(--ink);
+    border: 1.5px solid #d0d0d0;
+    border-left: none;
+    padding: 13px 26px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 1;
+    letter-spacing: 0.3px;
+  }
+
+  /* ── SIGNATURES ── */
+  .sig-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    margin: 0 0 26px;
+  }
+  .sig { text-align: center; }
+  .sig .line {
+    font-family: ui-monospace, Menlo, monospace;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    color: var(--ink);
+    min-height: 18px;
+    line-height: 1;
+  }
+  .sig .lbl { font-weight: 900; font-size: 16px; }
+
+  /* ── FOOTER ── */
+  .foot-rule { border-top: 1.5px solid var(--line); margin: 14px 0 16px; }
+  .footer {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr 1.4fr;
+    gap: 20px;
+    align-items: flex-start;
+  }
+  .fitem { display: flex; gap: 12px; align-items: flex-start; }
+  .fitem .ic {
+    width: 30px; height: 30px;
+    border-radius: 4px;
+    border: 1.5px solid #ccc;
+    background: #fff;
+    display: grid; place-items: center;
+    flex-shrink: 0;
+  }
+  .fitem .flbl { font-weight: 900; font-size: 13.5px; margin-bottom: 2px; line-height: 1.2; }
+  .fitem .fval { font-size: 12px; line-height: 1.5; font-weight: 500; }
 
   /* ── PRINT BUTTON ── */
-  .pbar{text-align:center;padding:13px 0 7px;background:#f0f0f0}
-  .pbtn{padding:10px 32px;background:#e53935;color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Work Sans',sans-serif;letter-spacing:.4px}
-  .pbtn:hover{background:#c62828}
+  .pbar { text-align: center; padding: 13px 0 6px; background: #e7e9ec; }
+  .pbtn {
+    padding: 10px 32px; background: var(--red); color: #fff;
+    border: none; border-radius: 6px; font-size: 14px; font-weight: 700;
+    cursor: pointer; font-family: 'Mulish', sans-serif; letter-spacing: .4px;
+  }
+  .pbtn:hover { background: #c0151b; }
 
-  @media print{
-    body{background:#fff}
-    .pbar{display:none!important}
-    .page{margin:0;box-shadow:none;padding:22px 40px 0;min-height:0}
-    @page{size:A4;margin:0}
+  @media print {
+    html, body { margin: 0; padding: 0; background: white; }
+    .pbar { display: none !important; }
+    .invoice {
+      box-shadow: none; margin: 0; padding: 0;
+      width: 100%; height: auto;
+      min-height: calc(297mm - 24mm);
+    }
+    .header    { margin-bottom: 28px; }
+    .pill-wrap { margin: 20px 0 44px; }
+    .sig-row   { margin: 0 0 20px; page-break-inside: avoid; break-inside: avoid; }
+    .footer    { page-break-inside: avoid; break-inside: avoid; }
+    .fitem     { page-break-inside: avoid; break-inside: avoid; }
+    @page { size: A4; margin: 12mm 16mm; }
   }
 `;
 
 function buildHTML(type, { vehicle, sale, buyer }, logoSrc) {
-  const isAdv   = type === 'advance';
-  const title   = isAdv ? 'ADVANCED INVOICE' : 'INVOICE';
-  const date    = isAdv ? (sale.advance_date || sale.sell_date) : sale.sell_date;
+  const isAdv = type === 'advance';
+  const title = isAdv ? 'ADVANCED INVOICE' : 'INVOICE';
+  const date  = isAdv ? (sale.advance_date || sale.sell_date) : sale.sell_date;
 
   const vehicleName = [vehicle.brand, vehicle.model, vehicle.year].filter(Boolean).join(' ');
 
-  // Structured detail rows — all four key fields always shown if present
-  const detailRows = [
-    ['Chassis No',       vehicle.chassis],
-    ['Engine No',        vehicle.engine_num],
-    ['Model Code',       vehicle.model_code],
-    ['Country of Origin',vehicle.origin],
-    ['Fuel Type',        vehicle.fuel_type],
-  ]
-    .filter(([, v]) => v)
-    .map(([lbl, val]) => `<tr><td class="vd-lbl">${lbl}</td><td class="vd-val">${val}</td></tr>`)
-    .join('');
+  // Description lines — exact Canva text format
+  const descLines = [
+    vehicleName,
+    vehicle.chassis    ? `chassis number -[${vehicle.chassis}]`              : null,
+    vehicle.engine_num ? `Engine number - [ ${vehicle.engine_num} ]`         : null,
+    vehicle.model_code ? `Model - [${vehicle.model_code} ]`                  : null,
+    vehicle.origin     ? `Country of origin - [ ${vehicle.origin} ]`         : null,
+    vehicle.fuel_type  ? `Fuel Type- ${vehicle.fuel_type}`                   : null,
+  ].filter(Boolean).join('<br>');
 
-  const leaseFmt = fmt(sale.lease_amount);
-  const cashFmt  = fmt(sale.cash_amount);
-  const vpFmt    = fmt(sale.vehicle_price);
-  const rmvFmt   = fmt(sale.rmv_fee);
-  const sellFmt  = fmt(sale.sell_price);
-  const advFmt   = fmt(sale.advance_amount);
+  const leaseF = fmtRs(sale.lease_amount);
+  const cashF  = fmtRs(sale.cash_amount);
+  const vpF    = fmtRs(sale.vehicle_price);
+  const rmvF   = fmtRs(sale.rmv_fee);
+  const sellF  = fmtRs(sale.sell_price);
+  const advF   = fmtLKR(sale.advance_amount);
+  const sellLKR = fmtLKR(sale.sell_price);
 
-  const lcBlock = (leaseFmt || cashFmt) ? `
-    <div class="lc-block">
-      ${leaseFmt ? `<div><b>Lease Amount:</b> Rs. ${leaseFmt}</div>` : ''}
-      ${cashFmt  ? `<div><b>Cash Amount:</b> Rs. ${cashFmt}</div>`   : ''}
-    </div>
-    <div class="hr-thin"></div>` : '';
+  const leaseBlock = (leaseF || cashF) ? `
+    <div class="lease-block">
+      ${leaseF ? `<div>Lease Amount: ${leaseF}</div>` : ''}
+      ${cashF  ? `<div>Cash Amount: ${cashF}</div>`   : ''}
+    </div>` : '';
 
-  // Price breakdown lines
-  const priceLines = [
-    vpFmt  ? ['Vehicle Price',   `Rs. ${vpFmt}`,   false] : null,
-    rmvFmt ? ['RMV Fee',         `Rs. ${rmvFmt}`,  false] : null,
-    sellFmt ? ['Selling Price',  `Rs. ${sellFmt}`, true]  : null,
-  ]
-    .filter(Boolean)
-    .map(([lbl, val, total]) =>
-      `<div class="item-row${total ? ' total-row' : ''}">
-        <span class="item-lbl">${lbl}</span>
-        <span class="item-val">${val}</span>
-      </div>`
-    ).join('');
+  // Both invoice types use the same bold left-aligned text block (matching blank template)
+  const priceBlock = `
+    ${(vpF || rmvF) ? `
+    <div class="adv-prices">
+      ${vpF  ? `<div>Vehicle Price: ${vpF}</div>`  : ''}
+      ${rmvF ? `<div>RMV Fee: ${rmvF}</div>`       : ''}
+    </div>` : ''}
+    ${sellF ? `<div class="adv-prices selling">Selling Price: ${sellF}</div>` : ''}
+  `;
 
-  const payBadge  = isAdv ? 'ADVANCED' : 'SELLING PRICE';
-  const payAmount = isAdv ? `LKR ${advFmt ?? sellFmt}` : `LKR ${sellFmt}`;
-
-  // Signature styles differ: advance seller has no line, full has a line; buyer always has dashes
-  const sellerSig = `
-    <div class="sig-block">
-      <div class="sig-space"></div>
-      ${isAdv ? '' : '<div class="sig-line"></div>'}
-      <div class="sig-lbl">Signature of Seller</div>
-    </div>`;
-
-  const buyerSig = `
-    <div class="sig-block sig-block-right">
-      <div class="sig-space"></div>
-      <div class="sig-dashes">_ _ _ _ _ _ _ _ _</div>
-      <div class="sig-lbl">Signature of Buyer</div>
-    </div>`;
+  const pillLabel  = isAdv ? 'ADVANCED'       : 'SELLING PRICE';
+  const pillAmount = isAdv ? (advF || sellLKR) : sellLKR;
 
   const addrHTML = (buyer.buyer_address || '')
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/\n/g, '<br>');
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\n/g,'<br>');
 
   const logoTag = logoSrc
     ? `<img class="logo-img" src="${logoSrc}" alt="Fernando Auto Dealers">`
-    : `<div style="font-family:'Josefin Sans',sans-serif;font-size:20px;font-weight:700;letter-spacing:3px;color:#111">Fernando</div>`;
+    : `<div style="font-weight:900;font-size:22px;color:#ed1c24;text-transform:uppercase">Fernando</div>`;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -246,7 +322,7 @@ function buildHTML(type, { vehicle, sale, buyer }, logoSrc) {
   <title>${title} — Fernando Auto Dealers</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;600;700&family=Work+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>${CSS}</style>
 </head>
 <body>
@@ -254,95 +330,91 @@ function buildHTML(type, { vehicle, sale, buyer }, logoSrc) {
     <button class="pbtn" onclick="window.print()">&#128424;&nbsp; Print / Save as PDF</button>
   </div>
 
-  <div class="page">
-    <div class="page-body">
+  <div class="invoice">
+    <div class="inv-body">
 
       <!-- HEADER -->
-      <div class="inv-hdr">
+      <div class="header">
         ${logoTag}
-        <div class="co-name">
-          <h1>Fernando<br>Auto Dealers</h1>
-          <p>Vehicle Sales &amp; Imports · Moratuwa</p>
-        </div>
-        <div class="dia-wrap">${DIAMOND_SVG}</div>
+        <div class="brand">Fernando Auto Dealers</div>
       </div>
 
       <!-- TITLE -->
-      <div class="inv-title">
-        <div class="title-bar"></div>
-        <div class="title-txt">${title}</div>
+      <div class="title-wrap">
+        <span class="title-mark"></span>
+        <h1 class="title">${title}</h1>
       </div>
 
-      <!-- RECIPIENT -->
-      <div class="inv-to">
-        <div class="to-left">
-          <div class="to-lbl">Bill To</div>
-          <div class="to-name">${buyer.customer_name || '—'}</div>
-          ${addrHTML ? `<div class="to-addr">${addrHTML}</div>` : ''}
+      <!-- BUYER + DATE -->
+      <div class="top-row">
+        <div class="to-block">
+          <div class="to-lbl">To</div>
+          <div class="buyer-name">${buyer.customer_name || '—'}</div>
+          ${addrHTML ? `<div class="buyer-addr">${addrHTML}</div>` : ''}
         </div>
-        <div class="to-right">
-          <div class="date-lbl">Date</div>
-          <div class="date-val">${fmtDate(date)}</div>
+        <div class="date-block">
+          <span class="dlbl">Date</span> :<span class="dval">${fmtDate(date)}</span>
         </div>
       </div>
 
-      <!-- DESCRIPTION SECTION -->
-      <div class="hr"></div>
-      <div class="desc-hdr">Description</div>
-      <div class="hr"></div>
+      <!-- DESCRIPTION -->
+      <div class="section-label">DESCRIPTION</div>
+      <div class="desc">${descLines}</div>
 
-      <!-- VEHICLE DETAILS -->
-      <div class="vehicle-name">${vehicleName}</div>
-      ${detailRows ? `<table class="vd-table"><tbody>${detailRows}</tbody></table>` : ''}
+      ${leaseBlock}
+      ${priceBlock}
 
-      <div class="hr-thin"></div>
-
-      ${lcBlock}
-      ${priceLines ? `<div style="margin:4px 0 2px">${priceLines}</div>` : ''}
-
-      <!-- PAYMENT BADGE -->
-      <div class="inv-pay">
-        <div class="pay-badge">${payBadge}</div>
-        <div class="pay-amt">${payAmount}</div>
+      <!-- PILL TOTAL -->
+      <div class="pill-wrap">
+        <div class="pill">
+          <div class="pill-label">${pillLabel}</div>
+          <div class="pill-value">${pillAmount}</div>
+        </div>
       </div>
 
       <!-- SIGNATURES -->
-      <div class="inv-sigs">
-        ${sellerSig}
-        ${buyerSig}
+      <div class="sig-row">
+        <div class="sig">
+          <div class="line">_______________</div>
+          <div class="lbl">Signature of seller</div>
+        </div>
+        <div class="sig">
+          <div class="line">_______________</div>
+          <div class="lbl">Signature of buyer</div>
+        </div>
       </div>
 
-    </div><!-- /.page-body -->
+    </div><!-- /.inv-body -->
 
-    <!-- FOOTER pinned to bottom -->
-    <div class="page-footer">
-      <div class="foot-hr"></div>
-      <div class="foot">
+    <!-- FOOTER -->
+    <div>
+      <div class="foot-rule"></div>
+      <div class="footer">
         <div class="fitem">
-          <div class="ficon">&#128222;</div>
-          <div class="ftxt">
+          <div class="ic">${IC_PHONE}</div>
+          <div>
             <div class="flbl">Phone</div>
             <div class="fval">0784738223</div>
           </div>
         </div>
         <div class="fitem">
-          <div class="ficon">&#9993;</div>
-          <div class="ftxt">
-            <div class="flbl">Email</div>
-            <div class="fval">fernandoautodealers<br>@gmail.com</div>
+          <div class="ic">${IC_MAIL}</div>
+          <div>
+            <div class="flbl">Mail</div>
+            <div class="fval">fernandoautodealers@gmail.com</div>
           </div>
         </div>
         <div class="fitem">
-          <div class="ficon">&#128205;</div>
-          <div class="ftxt">
+          <div class="ic">${IC_PIN}</div>
+          <div>
             <div class="flbl">Address</div>
-            <div class="fval">140/15 De Mel Road,<br>Lakshapathiya, Moratuwa</div>
+            <div class="fval">Fernando Auto Dealers<br>140/15 De Mel Road,<br>Lakshapathiya, Moratuwa</div>
           </div>
         </div>
       </div>
     </div>
 
-  </div><!-- /.page -->
+  </div><!-- /.invoice -->
 </body>
 </html>`;
 }
