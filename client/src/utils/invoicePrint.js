@@ -266,31 +266,34 @@ const CSS = `
     html, body { margin: 0; padding: 0; background: white; }
     .pbar { display: none !important; }
     .invoice {
-      box-shadow: none; margin: 0; padding: 0;
+      box-shadow: none; margin: 0;
+      padding: 10mm 14mm 8mm;
       width: 100%; height: auto; min-height: unset;
     }
-    .header       { margin-bottom: 18px; }
-    .logo-img     { width: 130px; margin-bottom: 10px; }
-    .brand        { font-size: 21px; }
-    .title-wrap   { margin: 0 0 16px; }
-    .title        { font-size: 30px; }
-    .top-row      { padding-bottom: 10px; margin-bottom: 10px; }
-    .section-label{ padding-bottom: 8px; margin-bottom: 10px; }
-    .desc         { padding-bottom: 12px; margin-bottom: 12px; font-size: 12.5px; line-height: 1.65; }
-    .lease-block  { padding-bottom: 10px; margin-bottom: 12px; font-size: 13px; line-height: 1.65; }
-    .adv-prices   { padding-bottom: 10px; margin-bottom: 10px; font-size: 13px; line-height: 1.65; }
-    .pill-wrap    { margin: 14px 0 22px; }
-    .pill         { min-width: 300px; font-size: 14px; }
-    .pill-label, .pill-value { padding: 10px 20px; }
-    .sig-row      { margin: 0 0 16px; gap: 40px; page-break-inside: avoid; break-inside: avoid; }
-    .sig .lbl     { font-size: 14px; }
-    .foot-rule    { margin: 10px 0 12px; }
-    .footer       { page-break-inside: avoid; break-inside: avoid; gap: 14px; }
+    .header       { margin-bottom: 14px; }
+    .logo-img     { width: 110px; margin-bottom: 8px; }
+    .brand        { font-size: 19px; letter-spacing: 2px; }
+    .title-wrap   { margin: 0 0 12px; }
+    .title        { font-size: 28px; }
+    .title-mark   { width: 26px; height: 24px; }
+    .top-row      { padding-bottom: 8px; margin-bottom: 8px; }
+    .buyer-name   { font-size: 20px; }
+    .section-label{ padding-bottom: 6px; margin-bottom: 8px; font-size: 13px; }
+    .desc         { padding-bottom: 10px; margin-bottom: 10px; font-size: 12px; line-height: 1.6; }
+    .lease-block  { padding-bottom: 8px; margin-bottom: 10px; font-size: 12.5px; line-height: 1.6; }
+    .adv-prices   { padding-bottom: 8px; margin-bottom: 8px; font-size: 12.5px; line-height: 1.6; }
+    .pill-wrap    { margin: 12px 0 18px; }
+    .pill         { min-width: 280px; font-size: 13px; }
+    .pill-label, .pill-value { padding: 9px 18px; }
+    .sig-row      { margin: 0 0 12px; gap: 40px; page-break-inside: avoid; break-inside: avoid; }
+    .sig .lbl     { font-size: 13px; }
+    .foot-rule    { margin: 8px 0 10px; }
+    .footer       { page-break-inside: avoid; break-inside: avoid; gap: 12px; }
     .fitem        { page-break-inside: avoid; break-inside: avoid; }
-    .fitem .ic    { width: 26px; height: 26px; }
-    .fitem .flbl  { font-size: 12.5px; }
+    .fitem .ic    { width: 24px; height: 24px; }
+    .fitem .flbl  { font-size: 12px; }
     .fitem .fval  { font-size: 11px; }
-    @page { size: A4; margin: 10mm 14mm; }
+    @page { size: A4; margin: 0; }
   }
 `;
 
