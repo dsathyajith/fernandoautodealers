@@ -1,18 +1,34 @@
-import logoUrl from '../assests/aboutaaa.png';
+import logoUrl from "../assests/aboutaaa.png";
 
-const fmtNum = n => {
-  if (n == null || n === '' || isNaN(n)) return null;
-  return Number(n).toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmtNum = (n) => {
+  if (n == null || n === "" || isNaN(n)) return null;
+  return Number(n).toLocaleString("en-LK", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 };
 
-const fmtRs  = n => n != null ? 'Rs. '  + fmtNum(n) : null;
-const fmtLKR = n => n != null ? 'LKR '  + fmtNum(n) : null;
+const fmtRs = (n) => (n != null ? "Rs. " + fmtNum(n) : null);
+const fmtLKR = (n) => (n != null ? "LKR " + fmtNum(n) : null);
 
-const fmtDate = d => {
-  if (!d) return '—';
-  const s = String(d).split('T')[0];
-  const [y, m, dy] = s.split('-');
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const fmtDate = (d) => {
+  if (!d) return "—";
+  const s = String(d).split("T")[0];
+  const [y, m, dy] = s.split("-");
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
   return `${parseInt(dy)} ${months[parseInt(m) - 1]} ${y}`;
 };
 
@@ -50,6 +66,7 @@ const CSS = `
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
+    
 
   /* ── PAGE ── */
   .invoice {
@@ -278,52 +295,65 @@ const CSS = `
 `;
 
 function buildHTML(type, { vehicle, sale, buyer }, logoSrc) {
-  const isAdv = type === 'advance';
-  const title = isAdv ? 'ADVANCED INVOICE' : 'INVOICE';
-  const date  = isAdv ? (sale.advance_date || sale.sell_date) : sale.sell_date;
+  const isAdv = type === "advance";
+  const title = isAdv ? "ADVANCED INVOICE" : "INVOICE";
+  const date = isAdv ? sale.advance_date || sale.sell_date : sale.sell_date;
 
-  const vehicleName = [vehicle.brand, vehicle.model, vehicle.year].filter(Boolean).join(' ');
+  const vehicleName = [vehicle.brand, vehicle.model, vehicle.year]
+    .filter(Boolean)
+    .join(" ");
 
   // Description lines — exact Canva text format
   const descLines = [
     vehicleName,
-    vehicle.chassis    ? `chassis number -[${vehicle.chassis}]`              : null,
-    vehicle.engine_num ? `Engine number - [ ${vehicle.engine_num} ]`         : null,
-    vehicle.model_code ? `Model - [${vehicle.model_code} ]`                  : null,
-    vehicle.origin     ? `Country of origin - [ ${vehicle.origin} ]`         : null,
-    vehicle.fuel_type  ? `Fuel Type- ${vehicle.fuel_type}`                   : null,
-  ].filter(Boolean).join('<br>');
+    vehicle.chassis ? `chassis number -[${vehicle.chassis}]` : null,
+    vehicle.engine_num ? `Engine number - [ ${vehicle.engine_num} ]` : null,
+    vehicle.model_code ? `Model - [${vehicle.model_code} ]` : null,
+    vehicle.origin ? `Country of origin - [ ${vehicle.origin} ]` : null,
+    vehicle.fuel_type ? `Fuel Type- ${vehicle.fuel_type}` : null,
+  ]
+    .filter(Boolean)
+    .join("<br>");
 
   const leaseF = fmtRs(sale.lease_amount);
-  const cashF  = fmtRs(sale.cash_amount);
-  const vpF    = fmtRs(sale.vehicle_price);
-  const rmvF   = fmtRs(sale.rmv_fee);
-  const sellF  = fmtRs(sale.sell_price);
-  const advF   = fmtLKR(sale.advance_amount);
+  const cashF = fmtRs(sale.cash_amount);
+  const vpF = fmtRs(sale.vehicle_price);
+  const rmvF = fmtRs(sale.rmv_fee);
+  const sellF = fmtRs(sale.sell_price);
+  const advF = fmtLKR(sale.advance_amount);
   const sellLKR = fmtLKR(sale.sell_price);
 
-  const leaseBlock = (leaseF || cashF) ? `
+  const leaseBlock =
+    leaseF || cashF
+      ? `
     <div class="lease-block">
-      ${leaseF ? `<div>Lease Amount: ${leaseF}</div>` : ''}
-      ${cashF  ? `<div>Cash Amount: ${cashF}</div>`   : ''}
-    </div>` : '';
+      ${leaseF ? `<div>Lease Amount: ${leaseF}</div>` : ""}
+      ${cashF ? `<div>Cash Amount: ${cashF}</div>` : ""}
+    </div>`
+      : "";
 
   // Both invoice types use the same bold left-aligned text block (matching blank template)
   const priceBlock = `
-    ${(vpF || rmvF) ? `
+    ${
+      vpF || rmvF
+        ? `
     <div class="adv-prices">
-      ${vpF  ? `<div>Vehicle Price: ${vpF}</div>`  : ''}
-      ${rmvF ? `<div>RMV Fee: ${rmvF}</div>`       : ''}
-    </div>` : ''}
-    ${sellF ? `<div class="adv-prices selling">Selling Price: ${sellF}</div>` : ''}
+      ${vpF ? `<div>Vehicle Price: ${vpF}</div>` : ""}
+      ${rmvF ? `<div>RMV Fee: ${rmvF}</div>` : ""}
+    </div>`
+        : ""
+    }
+    ${sellF ? `<div class="adv-prices selling">Selling Price: ${sellF}</div>` : ""}
   `;
 
-  const pillLabel  = isAdv ? 'ADVANCED'       : 'SELLING PRICE';
-  const pillAmount = isAdv ? (advF || sellLKR) : sellLKR;
+  const pillLabel = isAdv ? "ADVANCED" : "SELLING PRICE";
+  const pillAmount = isAdv ? advF || sellLKR : sellLKR;
 
-  const addrHTML = (buyer.buyer_address || '')
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/\n/g,'<br>');
+  const addrHTML = (buyer.buyer_address || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\n/g, "<br>");
 
   const logoTag = logoSrc
     ? `<img class="logo-img" src="${logoSrc}" alt="Fernando Auto Dealers">`
@@ -364,8 +394,8 @@ function buildHTML(type, { vehicle, sale, buyer }, logoSrc) {
       <div class="top-row">
         <div class="to-block">
           <div class="to-lbl">To</div>
-          <div class="buyer-name">${buyer.customer_name || '—'}</div>
-          ${addrHTML ? `<div class="buyer-addr">${addrHTML}</div>` : ''}
+          <div class="buyer-name">${buyer.customer_name || "—"}</div>
+          ${addrHTML ? `<div class="buyer-addr">${addrHTML}</div>` : ""}
         </div>
         <div class="date-block">
           <span class="dlbl">Date</span> :<span class="dval">${fmtDate(date)}</span>
@@ -435,9 +465,15 @@ function buildHTML(type, { vehicle, sale, buyer }, logoSrc) {
 }
 
 function openInvoice(html) {
-  const win = window.open('', '_blank', 'width=870,height=1200,scrollbars=yes,resizable=yes');
+  const win = window.open(
+    "",
+    "_blank",
+    "width=870,height=1200,scrollbars=yes,resizable=yes",
+  );
   if (!win) {
-    alert('Popups are blocked. Please allow popups for this site to print invoices.');
+    alert(
+      "Popups are blocked. Please allow popups for this site to print invoices.",
+    );
     return;
   }
   win.document.write(html);
@@ -445,9 +481,9 @@ function openInvoice(html) {
 }
 
 export function printAdvanceInvoice(data) {
-  openInvoice(buildHTML('advance', data, logoUrl));
+  openInvoice(buildHTML("advance", data, logoUrl));
 }
 
 export function printCustomerInvoice(data) {
-  openInvoice(buildHTML('full', data, logoUrl));
+  openInvoice(buildHTML("full", data, logoUrl));
 }
