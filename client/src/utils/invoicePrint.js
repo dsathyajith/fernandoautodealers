@@ -167,7 +167,7 @@ const CSS = `
   .pill-wrap {
     display: flex;
     justify-content: flex-end;
-    margin: 28px 0 84px;
+    margin: 20px 0 40px;
   }
   .pill {
     display: inline-flex;
@@ -250,15 +250,30 @@ const CSS = `
     .pbar { display: none !important; }
     .invoice {
       box-shadow: none; margin: 0; padding: 0;
-      width: 100%; height: auto;
-      min-height: calc(297mm - 24mm);
+      width: 100%; height: auto; min-height: unset;
     }
-    .header    { margin-bottom: 28px; }
-    .pill-wrap { margin: 20px 0 44px; }
-    .sig-row   { margin: 0 0 20px; page-break-inside: avoid; break-inside: avoid; }
-    .footer    { page-break-inside: avoid; break-inside: avoid; }
-    .fitem     { page-break-inside: avoid; break-inside: avoid; }
-    @page { size: A4; margin: 12mm 16mm; }
+    .header       { margin-bottom: 18px; }
+    .logo-img     { width: 130px; margin-bottom: 10px; }
+    .brand        { font-size: 21px; }
+    .title-wrap   { margin: 0 0 16px; }
+    .title        { font-size: 30px; }
+    .top-row      { padding-bottom: 10px; margin-bottom: 10px; }
+    .section-label{ padding-bottom: 8px; margin-bottom: 10px; }
+    .desc         { padding-bottom: 12px; margin-bottom: 12px; font-size: 12.5px; line-height: 1.65; }
+    .lease-block  { padding-bottom: 10px; margin-bottom: 12px; font-size: 13px; line-height: 1.65; }
+    .adv-prices   { padding-bottom: 10px; margin-bottom: 10px; font-size: 13px; line-height: 1.65; }
+    .pill-wrap    { margin: 14px 0 22px; }
+    .pill         { min-width: 300px; font-size: 14px; }
+    .pill-label, .pill-value { padding: 10px 20px; }
+    .sig-row      { margin: 0 0 16px; gap: 40px; page-break-inside: avoid; break-inside: avoid; }
+    .sig .lbl     { font-size: 14px; }
+    .foot-rule    { margin: 10px 0 12px; }
+    .footer       { page-break-inside: avoid; break-inside: avoid; gap: 14px; }
+    .fitem        { page-break-inside: avoid; break-inside: avoid; }
+    .fitem .ic    { width: 26px; height: 26px; }
+    .fitem .flbl  { font-size: 12.5px; }
+    .fitem .fval  { font-size: 11px; }
+    @page { size: A4; margin: 10mm 14mm; }
   }
 `;
 
